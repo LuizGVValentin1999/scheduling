@@ -1,59 +1,236 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Scheduling SaaS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema de agendamento multi-tenant construído como monolito Laravel com ilhas React. Cada workspace (tenant) tem suas próprias agendas, usuários e configurações, isolados por escopo global automático.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Camada | Tecnologia |
+|---|---|
+| Backend | Laravel 12 · PHP 8.2 |
+| Banco de dados | MySQL 8.4 |
+| Cache / Filas | Redis 7 |
+| Frontend (componentes) | React 18 · MUI v6 · FullCalendar v6 |
+| Build de assets | Vite 5 |
+| Autenticação social | Laravel Socialite (Google + Microsoft Azure) |
+| Servidor web | Nginx Alpine |
+| E-mail (dev) | Mailpit |
+| Containerização | Docker Compose |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Funcionalidades
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Multi-tenancy
+- Cada usuário pertence a um ou mais **workspaces** (tenants)
+- Isolamento automático via `TenantScope` (Global Scope do Eloquent)
+- Troca de workspace sem re-login
+- Funções por workspace: `admin`, `member`, `viewer`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Autenticação
+- Login e registro com **e-mail + senha**
+- OAuth via **Google** e **Microsoft (Azure)**
+- Opção "Lembrar de mim"
 
-## Laravel Sponsors
+### Agendas
+- Criação e edição de agendas com nome, descrição e duração de slot configurável
+- Compartilhamento de agenda com outros usuários do workspace (permissões granulares)
+- Geração de links públicos para agendamento externo
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Calendário (React Island)
+- Visualização por mês, semana e dia (FullCalendar)
+- Criar agendamento clicando num slot livre ou pelo botão "Novo agendamento"
+- Editar e cancelar clicando num evento existente
+- Drag & drop para reagendar
+- Indicador de horário atual em tempo real
 
-### Premium Partners
+### Agendamento público
+- Links públicos por agenda com token único
+- Página responsiva para o cliente final (`/book/{token}`)
+  - Header com dados do profissional e informações da agenda
+  - Horários de atendimento configurados exibidos ao cliente
+  - Widget de 4 passos: dia → horário disponível → dados pessoais → confirmação
+  - Validação: nome obrigatório + pelo menos e-mail **ou** telefone
+- Revogação de links a qualquer momento pelo proprietário
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Painel Admin (por workspace)
+- Listagem e gerenciamento de usuários do tenant
+- Convite de novos membros
+- Alteração de papéis e remoção de usuários
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Requisitos
 
-## Code of Conduct
+- **Docker** e **Docker Compose** (recomendado)
+- Ou: PHP 8.2+, Composer, Node.js 20+, MySQL 8, Redis
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## Instalação com Docker
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+# 1. Clone o repositório
+git clone <repo-url> scheduling
+cd scheduling
 
-## License
+# 2. Copie o .env
+cp .env.example .env
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 3. Preencha as variáveis obrigatórias no .env
+#    (veja a seção Variáveis de Ambiente abaixo)
+
+# 4. Suba os containers
+docker compose up -d
+
+# 5. Instale dependências PHP e JS
+docker compose exec app composer install
+docker compose exec app npm install
+
+# 6. Gere a chave da aplicação
+docker compose exec app php artisan key:generate
+
+# 7. Rode as migrations e seeds
+docker compose exec app php artisan migrate --seed
+
+# 8. Build dos assets
+docker compose exec app npm run build
+```
+
+A aplicação estará disponível em **http://localhost:8000**
+O Mailpit (captura de e-mails em dev) em **http://localhost:8025**
+
+---
+
+## Variáveis de Ambiente
+
+Copie `.env.example` para `.env` e preencha:
+
+```dotenv
+APP_URL=http://localhost:8000
+APP_KEY=                        # gerado por: php artisan key:generate
+
+DB_CONNECTION=mysql
+DB_HOST=db                      # nome do serviço Docker; fora do Docker use 127.0.0.1
+DB_PORT=3306
+DB_DATABASE=scheduling
+DB_USERNAME=scheduling_user
+DB_PASSWORD=secret
+
+# OAuth Google (console.cloud.google.com)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+
+# OAuth Microsoft (portal.azure.com)
+AZURE_CLIENT_ID=
+AZURE_CLIENT_SECRET=
+AZURE_REDIRECT_URI=http://localhost:8000/auth/microsoft/callback
+AZURE_TENANT_ID=common
+
+# E-mail em desenvolvimento (usa Mailpit)
+MAIL_MAILER=smtp
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+```
+
+---
+
+## Comandos úteis
+
+```bash
+# Ver logs da aplicação
+docker compose logs -f app
+
+# Artisan (qualquer comando)
+docker compose exec app php artisan <comando>
+
+# Shell interativo
+docker compose exec app bash
+
+# Recriar banco do zero
+docker compose exec app php artisan migrate:fresh --seed
+
+# Rodar testes
+docker compose exec app php artisan test
+
+# Hot-reload de assets (fora do Docker)
+npm run dev
+
+# Build de produção
+docker compose exec app npm run build
+```
+
+---
+
+## Estrutura relevante
+
+```
+app/
+├── Http/Controllers/
+│   ├── Auth/                       # Login, Register, SocialAuth (Google/Microsoft)
+│   ├── ScheduleController          # CRUD de agendas + geração de links públicos
+│   ├── AppointmentController       # API JSON consumida pelo React Calendar
+│   ├── PublicBookingController     # Página e POST de agendamento público
+│   ├── AdminController             # Painel admin do workspace
+│   └── ScheduleShareController     # Compartilhamento entre usuários
+├── Models/
+│   ├── Tenant / User / Schedule / Appointment
+│   ├── PublicBookingLink / ScheduleShare / Client
+│   ├── CalendarIntegration         # Tokens OAuth Google/Outlook (criptografados)
+│   └── Concerns/BelongsToTenant    # Trait de multi-tenancy automático
+├── Services/
+│   ├── ScheduleService
+│   └── AppointmentService
+└── Policies/                       # Autorização por modelo (Gate/Policy)
+
+resources/
+├── js/
+│   ├── app.jsx                     # Entry point — monta as ilhas React no DOM
+│   ├── components/
+│   │   ├── Calendar.jsx            # FullCalendar com modal de agendamento
+│   │   ├── AppointmentModal.jsx    # Criar / editar / cancelar agendamento
+│   │   └── DashboardStats.jsx      # Cards de métricas do dashboard
+│   └── widget/
+│       └── BookingWidget.jsx       # Widget standalone para /book/{token}
+└── views/
+    ├── layouts/app.blade.php       # Shell: sidebar desktop + topbar mobile
+    ├── auth/                       # Login e registro
+    ├── dashboard/
+    ├── schedules/                  # Index, show, create
+    └── public/book.blade.php       # Página pública de agendamento
+```
+
+---
+
+## Arquitetura: React Islands
+
+O frontend usa o padrão **React Islands**: o Laravel renderiza as páginas via Blade e monta componentes React apenas nos `<div>` que precisam de interatividade.
+
+```
+Blade renderiza o HTML
+  → app.jsx detecta #calendar-root   → monta <Calendar>
+  → app.jsx detecta #dashboard-stats → monta <DashboardStats>
+```
+
+Toda navegação é server-side (Laravel). Autenticação, autorização e sessão ficam 100% no servidor, sem duplicidade de lógica no frontend.
+
+---
+
+## Serviços Docker
+
+| Container | Porta local | Descrição |
+|---|---|---|
+| `scheduling_app` | — | PHP-FPM + Laravel |
+| `scheduling_nginx` | **8000** | Entrada HTTP |
+| `scheduling_db` | 3306 | MySQL 8.4 |
+| `scheduling_redis` | 6379 | Cache e filas |
+| `scheduling_queue` | — | Worker `queue:work` |
+| `scheduling_mail` | **8025** | Mailpit — UI de e-mails |
+
+---
+
+## Licença
+
+Uso pessoal / privado.
