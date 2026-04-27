@@ -18,6 +18,13 @@ class ScheduleController extends Controller
         return view('schedules.create');
     }
 
+    public function edit(Schedule $schedule): View
+    {
+        $this->authorize('update', $schedule);
+
+        return view('schedules.edit', compact('schedule'));
+    }
+
     /**
      * Lista agendas visíveis para o usuário autenticado.
      * Renderiza view Blade com dados iniciais passados para o React.

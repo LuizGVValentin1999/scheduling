@@ -29,6 +29,10 @@
                     <span class="material-symbols-rounded">add_circle</span>
                     Novo agendamento
                 </button>
+                <a href="{{ route('schedules.edit', $schedule) }}" class="btn-action btn-action--gray">
+                    <span class="material-symbols-rounded">edit</span>
+                    Editar
+                </a>
             @endif
             @can('share', $schedule)
                 <a href="{{ route('schedules.share', $schedule) }}" class="btn-action btn-action--purple">
@@ -44,8 +48,8 @@
                 </form>
             @endcan
             {{-- Link público existente --}}
-            @if($schedule->publicBookingLinks()->where('is_active', true)->exists())
-                @php $activeLink = $schedule->publicBookingLinks()->where('is_active', true)->latest()->first(); @endphp
+            @if($schedule->publicLinks()->where('is_active', true)->exists())
+                @php $activeLink = $schedule->publicLinks()->where('is_active', true)->latest()->first(); @endphp
                 <a href="{{ route('public.book', $activeLink->token) }}" target="_blank"
                    class="btn-action btn-action--gray" title="Abrir página de agendamento público">
                     <span class="material-symbols-rounded">open_in_new</span>
