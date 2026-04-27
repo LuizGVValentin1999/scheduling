@@ -1,0 +1,21 @@
+/* Sem Tailwind — este projeto usa MUI para UI components */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8fafc;
+}
+
+/* FullCalendar overrides para harmonizar com tema MUI roxo */
+.fc .fc-button {
+    background-color: #7c3aed !important;
+    border-color: #7c3aed !important;
+    text-transform: none !important;
+    font-weight: 600 !important;
+}
+.fc .fc-button:hover { background-color: #6d28d9 !important; border-color: #6d28d9 !important; }
+.fc .fc-button-primary:not(:disabled).fc-button-active { background-color: #5b21b6 !important; }
+.fc-event { border-radius: 6px !important; border: none !important; font-size: 12px !important; }
+
