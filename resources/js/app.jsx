@@ -24,6 +24,7 @@ import { ptBR } from 'date-fns/locale';
 import theme from './theme';
 import Calendar from './components/Calendar';
 import DashboardStats from './components/DashboardStats';
+import BookingWidget from './widget/BookingWidget';
 
 // -------------------------------------------------------
 // Mount: Calendário de agenda (schedule/show.blade.php)
@@ -43,6 +44,25 @@ if (calendarRoot) {
                     canEdit={canEdit}
                     csrf={csrf}
                 />
+            </LocalizationProvider>
+        </ThemeProvider>
+    );
+}
+
+// -------------------------------------------------------
+// Mount: Widget de agendamento público (public/book.blade.php)
+// -------------------------------------------------------
+const widgetRoot = document.getElementById('scheduling-widget');
+if (widgetRoot) {
+    const token    = widgetRoot.dataset.token   ?? '';
+    const baseUrl  = widgetRoot.dataset.baseUrl ?? window.location.origin;
+    const settings = JSON.parse(widgetRoot.dataset.settings ?? '{}');
+
+    createRoot(widgetRoot).render(
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+                <BookingWidget token={token} baseUrl={baseUrl} settings={settings} />
             </LocalizationProvider>
         </ThemeProvider>
     );

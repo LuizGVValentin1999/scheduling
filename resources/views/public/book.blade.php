@@ -370,7 +370,7 @@
     <a href="{{ url('/login') }}">Área restrita</a>
 </div>
 
-<script src="{{ asset('widget/scheduling-widget.iife.js') }}" defer></script>
+{{-- Widget montado pelo app.jsx via React Island (#scheduling-widget) --}}
 
 </body>
 </html>

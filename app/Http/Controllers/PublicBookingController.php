@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\PublicBookingLink;
 use App\Services\AppointmentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 /**
@@ -18,9 +20,10 @@ class PublicBookingController extends Controller
     public function __construct(private readonly AppointmentService $service) {}
 
     /**
-     * Exibe a página pública de agendamento (widget embutível via Blade + React).
+     * Exibe a página pública de agendamento.
+     * Retorna JSON quando solicitado pelo widget React (Accept: application/json).
      */
-    public function show(string $token): View
+    public function show(string $token, Request $request): View|JsonResponse
     {
         $link = PublicBookingLink::where('token', $token)->firstOrFail();
 
@@ -28,22 +31,38 @@ class PublicBookingController extends Controller
 
         $schedule = $link->schedule()->with('user')->firstOrFail();
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'schedule' => [
+                    'id'            => $schedule->id,
+                    'name'          => $schedule->name,
+                    'description'   => $schedule->description,
+                    'slot_duration' => $schedule->slot_duration,
+                    'working_hours' => $schedule->working_hours,
+                    'is_public'     => $schedule->is_public,
+                    'user'          => [
+                        'id'   => $schedule->user->id,
+                        'name' => $schedule->user->name,
+                    ],
+                ],
+            ]);
+        }
+
         return view('public.book', compact('link', 'schedule'));
     }
 
     /**
      * Recebe o formulário de agendamento público.
+     * Suporta tanto POST via form Blade quanto fetch JSON do widget React.
      */
-    public function store(string $token, Request $request): RedirectResponse
+    public function store(string $token, Request $request): RedirectResponse|JsonResponse
     {
         $link = PublicBookingLink::where('token', $token)->firstOrFail();
 
         abort_if(! $link->isValid(), 410);
 
-        // Resolve o tenant_id do schedule para o global scope não bloquear
         $schedule = $link->schedule;
 
-        // Força o tenant_id correto para o appointment poder ser criado sem sessão
         $data = $request->validate([
             'client_name'  => 'required|string|max:255',
             'client_email' => 'nullable|email|required_without:client_phone',
@@ -56,14 +75,17 @@ class PublicBookingController extends Controller
             'client_phone.required_without' => 'Informe o telefone ou o e-mail.',
         ]);
 
-        // Injeta o tenant_id manualmente porque não há usuário autenticado
-        $data['tenant_id'] = $schedule->tenant_id;
-        $data['title']     = "Agendamento — {$data['client_name']}";
-        $data['status']    = 'pending';
+        $data['tenant_id']        = $schedule->tenant_id;
+        $data['title']            = "Agendamento — {$data['client_name']}";
+        $data['status']           = 'pending';
+        $data['schedule_id']      = $schedule->id;
+        $data['duration_minutes'] = (int) ((strtotime($data['ends_at']) - strtotime($data['starts_at'])) / 60);
 
-        // Cria sem o global scope ativo (usuário não está logado)
-        Appointment::withoutGlobalScope(\App\Models\Scopes\TenantScope::class)
-            ->create(array_merge($data, ['schedule_id' => $schedule->id, 'duration_minutes' => (int)(strtotime($data['ends_at']) - strtotime($data['starts_at'])) / 60]));
+        Appointment::withoutGlobalScope(\App\Models\Scopes\TenantScope::class)->create($data);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Agendamento realizado com sucesso.'], 201);
+        }
 
         return redirect()->route('public.book', $token)
                          ->with('success', 'Agendamento realizado! Você receberá uma confirmação em breve.');
