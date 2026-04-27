@@ -73,6 +73,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/shares/{share}',               [ScheduleShareController::class, 'destroy'])->name('schedules.shares.destroy');
             Route::post('/booking-links',                  [ScheduleController::class, 'createBookingLink'])->name('schedules.booking-links.store');
             Route::delete('/booking-links/{link}',         [ScheduleController::class, 'revokeBookingLink'])->name('schedules.booking-links.destroy');
+            Route::get('/working-hours',                   [ScheduleController::class, 'editWorkingHours'])->name('schedules.working-hours');
+            Route::post('/working-hours',                  [ScheduleController::class, 'saveWorkingHours'])->name('schedules.working-hours.save');
         });
 
         // Agendamentos — JSON (consumidos pelo React Calendar)

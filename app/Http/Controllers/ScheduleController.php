@@ -91,6 +91,42 @@ class ScheduleController extends Controller
     }
 
     // --------------------------------------------------------
+    // Horários de trabalho
+    // --------------------------------------------------------
+
+    public function editWorkingHours(Schedule $schedule): View
+    {
+        $this->authorize('update', $schedule);
+
+        return view('schedules.working-hours', compact('schedule'));
+    }
+
+    public function saveWorkingHours(Schedule $schedule, Request $request): RedirectResponse
+    {
+        $this->authorize('update', $schedule);
+
+        $days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        $working = [];
+
+        foreach ($days as $day) {
+            $active = $request->boolean("days.{$day}.active");
+            $start  = $request->input("days.{$day}.start", '09:00');
+            $end    = $request->input("days.{$day}.end",   '18:00');
+
+            $working[$day] = [
+                'active' => $active,
+                'start'  => $active ? $start : '09:00',
+                'end'    => $active ? $end   : '18:00',
+            ];
+        }
+
+        $schedule->update(['working_hours' => $working]);
+
+        return redirect()->route('schedules.working-hours', $schedule)
+                         ->with('success', 'Horários salvos com sucesso.');
+    }
+
+    // --------------------------------------------------------
     // Links públicos
     // --------------------------------------------------------
 

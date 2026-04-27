@@ -29,6 +29,10 @@
                     <span class="material-symbols-rounded">add_circle</span>
                     Novo agendamento
                 </button>
+                <a href="{{ route('schedules.working-hours', $schedule) }}" class="btn-action btn-action--gray">
+                    <span class="material-symbols-rounded">schedule</span>
+                    Horários
+                </a>
                 <a href="{{ route('schedules.edit', $schedule) }}" class="btn-action btn-action--gray">
                     <span class="material-symbols-rounded">edit</span>
                     Editar
