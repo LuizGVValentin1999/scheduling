@@ -14,15 +14,16 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'email', 'avatar',
+        'name', 'email', 'password', 'avatar',
         'provider', 'provider_id',
         'current_tenant_id',
     ];
 
-    protected $hidden = ['remember_token'];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password'          => 'hashed',
     ];
 
     // --------------------------------------------------------

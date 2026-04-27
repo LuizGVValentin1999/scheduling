@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PublicBookingController;
@@ -16,7 +18,11 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/login', fn() => view('auth.login'))->name('login');
+Route::get('/login',    fn() => view('auth.login'))->name('login');
+Route::post('/login',   [LoginController::class, 'store'])->name('login.store');
+Route::get('/register', [RegisterController::class, 'show'])->name('register');
+Route::post('/register',[RegisterController::class, 'store'])->name('register.store');
+
 Route::get('/auth/google/redirect',    [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback',    [SocialAuthController::class, 'handleGoogleCallback']);
 Route::get('/auth/microsoft/redirect', [SocialAuthController::class, 'redirectToMicrosoft'])->name('auth.microsoft');

@@ -61,6 +61,7 @@ function BookingWidget({ token, baseUrl, settings = {} }) {
     const [loading, setLoading]       = useState(false);
     const [error, setError]           = useState('');
     const [success, setSuccess]       = useState(false);
+    const [attempted, setAttempted]   = useState(false);
 
     // Carrega dados da agenda ao montar
     useEffect(() => {
@@ -143,10 +144,12 @@ function BookingWidget({ token, baseUrl, settings = {} }) {
     const getCsrf = () =>
         document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
+    const hasContact = () => form.email.trim() !== '' || form.phone.trim() !== '';
+
     const canNext = () => {
         if (step === 0) return Boolean(selectedDate);
         if (step === 1) return Boolean(selectedSlot);
-        if (step === 2) return form.name.trim() && form.email.trim();
+        if (step === 2) return form.name.trim() !== '' && hasContact();
         return false;
     };
 
@@ -234,19 +237,29 @@ function BookingWidget({ token, baseUrl, settings = {} }) {
                                 value={form.name}
                                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                                 size="small" fullWidth
+                                required
                             />
+
+                            <Typography variant="caption" color="text.secondary" sx={{ pb: 0, mb: -1 }}>
+                                Preencha pelo menos um contato *
+                            </Typography>
+
                             <TextField
-                                label="E-mail *"
+                                label="E-mail"
                                 type="email"
                                 value={form.email}
-                                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                                onChange={e => { setAttempted(false); setForm(f => ({ ...f, email: e.target.value })); }}
                                 size="small" fullWidth
+                                error={attempted && !hasContact()}
                             />
                             <TextField
-                                label="Telefone"
+                                label="Telefone / WhatsApp"
                                 value={form.phone}
-                                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                                onChange={e => { setAttempted(false); setForm(f => ({ ...f, phone: e.target.value })); }}
                                 size="small" fullWidth
+                                placeholder="(11) 99999-9999"
+                                error={attempted && !hasContact()}
+                                helperText={attempted && !hasContact() ? 'Informe o e-mail ou o telefone.' : ''}
                             />
                         </Stack>
                     )}
@@ -278,7 +291,11 @@ function BookingWidget({ token, baseUrl, settings = {} }) {
                                 Voltar
                             </Button>
                             <Button
-                                onClick={step === 2 ? handleConfirm : () => setStep(s => s + 1)}
+                                onClick={step === 2 ? handleConfirm : () => {
+                                if (!canNext()) { setAttempted(true); return; }
+                                setAttempted(false);
+                                setStep(s => s + 1);
+                            }}
                                 disabled={!canNext() || loading}
                                 variant="contained"
                                 startIcon={loading ? <CircularProgress size={16} /> : null}

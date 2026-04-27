@@ -13,6 +13,11 @@ class ScheduleController extends Controller
 {
     public function __construct(private readonly ScheduleService $service) {}
 
+    public function create(): View
+    {
+        return view('schedules.create');
+    }
+
     /**
      * Lista agendas visíveis para o usuário autenticado.
      * Renderiza view Blade com dados iniciais passados para o React.

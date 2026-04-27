@@ -6,57 +6,135 @@
 
 <div style="max-width:600px;">
 
-    <h1 style="font-size:20px; font-weight:700; margin-bottom:24px; color:#1e1e2e;">Nova Agenda</h1>
+    <div class="page-header" style="margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <a href="{{ route('schedules.index') }}" class="breadcrumb-back">
+                <span class="material-symbols-rounded">arrow_back</span>
+            </a>
+            <div>
+                <h1 class="page-title">Nova Agenda</h1>
+                <div class="page-title-sub">Preencha as informações da sua nova agenda</div>
+            </div>
+        </div>
+    </div>
 
-    <form method="POST" action="{{ route('schedules.store') }}"
-          style="background:#fff; border-radius:12px; padding:32px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <form method="POST" action="{{ route('schedules.store') }}" class="card">
         @csrf
 
-        <div style="margin-bottom:16px;">
-            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:#374151;">Nome *</label>
+        <div class="form-group">
+            <label class="form-label">
+                <span class="material-symbols-rounded">edit</span>
+                Nome *
+            </label>
             <input type="text" name="name" value="{{ old('name') }}" required
-                   style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:14px;">
-            @error('name') <span style="color:#ef4444; font-size:12px;">{{ $message }}</span> @enderror
+                   class="form-input" placeholder="Ex: Consultório Dr. João">
+            @error('name') <div class="form-error">{{ $message }}</div> @enderror
         </div>
 
-        <div style="margin-bottom:16px;">
-            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:#374151;">Descrição</label>
+        <div class="form-group">
+            <label class="form-label">
+                <span class="material-symbols-rounded">description</span>
+                Descrição
+            </label>
             <textarea name="description" rows="3"
-                      style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:14px; resize:vertical;">{{ old('description') }}</textarea>
+                      class="form-input" placeholder="Descreva sua agenda (opcional)">{{ old('description') }}</textarea>
         </div>
 
-        <div style="margin-bottom:16px;">
-            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:#374151;">Duração padrão do slot (minutos)</label>
-            <select name="slot_duration"
-                    style="width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:14px;">
+        <div class="form-group">
+            <label class="form-label">
+                <span class="material-symbols-rounded">timer</span>
+                Duração do slot
+            </label>
+            <select name="slot_duration" class="form-input">
                 @foreach([15, 30, 45, 60, 90, 120] as $min)
                     <option value="{{ $min }}" {{ old('slot_duration', 60) == $min ? 'selected' : '' }}>
-                        {{ $min }}min
+                        {{ $min }} minutos
                     </option>
                 @endforeach
             </select>
         </div>
 
-        <div style="margin-bottom:24px; display:flex; align-items:center; gap:10px;">
-            <input type="checkbox" name="is_public" value="1" id="is_public"
-                   {{ old('is_public') ? 'checked' : '' }}>
-            <label for="is_public" style="font-size:14px; color:#374151;">Permitir agendamento público (via link)</label>
+        <div class="form-group form-group--check">
+            <label class="check-label">
+                <input type="checkbox" name="is_public" value="1"
+                       {{ old('is_public') ? 'checked' : '' }} class="check-input">
+                <div class="check-body">
+                    <span class="material-symbols-rounded check-icon">public</span>
+                    <div>
+                        <div style="font-size:14px; font-weight:500; color:#1e1e2e;">Agenda pública</div>
+                        <div style="font-size:12px; color:#6c7086;">Permite agendamento via link público compartilhável</div>
+                    </div>
+                </div>
+            </label>
         </div>
 
-        <div style="display:flex; gap:12px;">
-            <button type="submit"
-                    style="background:#7c3aed; color:#fff; padding:12px 24px; border-radius:8px;
-                           border:none; cursor:pointer; font-size:14px; font-weight:600;">
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">
+                <span class="material-symbols-rounded">calendar_add_on</span>
                 Criar Agenda
             </button>
-            <a href="{{ route('schedules.index') }}"
-               style="background:#f3f4f6; color:#374151; padding:12px 24px; border-radius:8px;
-                      text-decoration:none; font-size:14px; font-weight:600;">
+            <a href="{{ route('schedules.index') }}" class="btn-cancel">
                 Cancelar
             </a>
         </div>
-
     </form>
 </div>
+
+<style>
+.breadcrumb-back {
+    color: #6c7086; text-decoration: none; display: flex; align-items: center;
+    padding: 4px; border-radius: 6px; transition: background .15s, color .15s;
+}
+.breadcrumb-back:hover { background: #f1f5f9; color: #1e1e2e; }
+.breadcrumb-back .material-symbols-rounded { font-size: 20px; }
+
+.form-group { margin-bottom: 18px; }
+.form-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; margin-bottom: 7px; color: #374151;
+}
+.form-label .material-symbols-rounded { font-size: 15px; color: #7c3aed; }
+.form-input {
+    width: 100%; padding: 10px 12px; border: 1.5px solid #e5e7eb;
+    border-radius: 8px; font-size: 14px; outline: none;
+    transition: border-color .2s; background: #fff; font-family: inherit;
+    resize: vertical;
+}
+.form-input:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.08); }
+.form-error { color: #ef4444; font-size: 12px; margin-top: 4px; }
+
+.form-group--check { margin-bottom: 24px; }
+.check-label { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+.check-input {
+    width: 18px; height: 18px; margin-top: 2px; accent-color: #7c3aed; flex-shrink: 0;
+}
+.check-body { display: flex; align-items: center; gap: 10px; }
+.check-icon {
+    font-size: 20px; color: #7c3aed;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+.form-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-submit {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #7c3aed; color: #fff; padding: 11px 22px;
+    border-radius: 8px; border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: background .15s;
+}
+.btn-submit:hover { background: #6d28d9; }
+.btn-submit .material-symbols-rounded { font-size: 18px; }
+.btn-cancel {
+    display: inline-flex; align-items: center;
+    background: #f3f4f6; color: #374151; padding: 11px 22px;
+    border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;
+    transition: background .15s;
+}
+.btn-cancel:hover { background: #e5e7eb; }
+
+@media (max-width: 480px) {
+    .form-actions { flex-direction: column; }
+    .btn-submit, .btn-cancel { width: 100%; justify-content: center; }
+}
+</style>
 
 @endsection

@@ -46,11 +46,14 @@ class PublicBookingController extends Controller
         // Força o tenant_id correto para o appointment poder ser criado sem sessão
         $data = $request->validate([
             'client_name'  => 'required|string|max:255',
-            'client_email' => 'required|email',
-            'client_phone' => 'nullable|string|max:30',
+            'client_email' => 'nullable|email|required_without:client_phone',
+            'client_phone' => 'nullable|string|max:30|required_without:client_email',
             'starts_at'    => 'required|date|after:now',
             'ends_at'      => 'required|date|after:starts_at',
             'description'  => 'nullable|string',
+        ], [
+            'client_email.required_without' => 'Informe o e-mail ou o telefone.',
+            'client_phone.required_without' => 'Informe o telefone ou o e-mail.',
         ]);
 
         // Injeta o tenant_id manualmente porque não há usuário autenticado
